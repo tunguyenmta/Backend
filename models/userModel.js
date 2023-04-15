@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-
 const userSchema = mongoose.Schema({
     name:{
         type: 'string',
@@ -17,12 +16,27 @@ const userSchema = mongoose.Schema({
         type: 'array',
         default: []
     },
-    createdAt:{
-        type: Date,
-        default: new Date()
-
-
+    userImage:{
+        contentType: String,
+        data: Buffer,
+    },
+    address: {
+        type: 'string',
+        default: ""
+    },
+    userName:{
+        type: 'string',
+    },
+    age: {
+        type: 'number',
+        default: 18
+    },
+    payment: {
+        type: 'string',
+        default: ""
     }
+}, {
+    timestamps: true
 })
 
 module.exports = mongoose.model('User',userSchema)

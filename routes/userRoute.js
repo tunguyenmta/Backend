@@ -1,18 +1,20 @@
-const { Router } = require('express');
 const express = require('express');
-const {getAllUsers, getUserById, updateUser, deleteUser, registerUser, login} = require('../controllers/userController')
-
+const upload = require('../middlewares/upload')
+const {getAllUsers, getUserById, updateUser, deleteUser, registerUser, login, getMe} = require('../controllers/userController')
+const protect = require('../middlewares/authMiddleware')
 const router = express.Router();
 
 router.get('/', getAllUsers)
 
+router.get('/me', protect, getMe)
+
 router.get('/:userid', getUserById)
 
-router.post('/register', registerUser)
+router.post('/register', upload.single('image'), registerUser)
 
 router.post('/login', login)
 
-router.put('/:userid', updateUser)
+router.put('/:userid', upload.single('avatar'), updateUser)
 
 router.delete('/:userid', deleteUser)
 
