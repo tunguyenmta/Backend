@@ -20,6 +20,7 @@ const corsConf = {
   
 app.use(cors(corsConf));
 app.use('/api/user',require('./routes/userRoute'))
+app.use('/api/game', require('./routes/gameRoute'))
 // app.use('/api/image', require('./routes/uploadRoute'))
 app.use(errorHandler)
-app.listen(Port, ()=> console.log(`Server connected on port ${Port}`))
+app.listen(Port, ()=> console.log(`Server connected on port ${Port}`))  

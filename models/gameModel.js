@@ -10,15 +10,24 @@ const gameSchema = mongoose.Schema({
         required: true
     },
     image: {
-        type: "string",
-        required: true
+        contentType: String,
+        data: Buffer,
     },
     icon:{
-        type: "string",
-        required: true
+        contentType: String,
+        data: Buffer,
     },
-    creator: {type: mongoose.Schema.type.objectId, required: true, ref: 'User'},
-    buyer: [{type: mongoose.Schema.type.objectId, ref: 'User'}], default: []
+    rating:{
+        type: 'number',
+        default: 0
+    },
+    rated: {
+        type: 'number',
+        default: 0
+    }
+    ,
+    creator: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User'},
+    buyer: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}], default: []
 })
 
 module.exports = mongoose.model("Game", gameSchema)

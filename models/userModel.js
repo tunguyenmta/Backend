@@ -34,6 +34,10 @@ const userSchema = mongoose.Schema({
     payment: {
         type: 'string',
         default: ""
+    },
+    isAdmin:{
+        type: 'boolean',
+        default: false
     }
 }, {
     timestamps: true
