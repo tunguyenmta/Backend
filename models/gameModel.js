@@ -10,12 +10,12 @@ const gameSchema = mongoose.Schema({
         required: true
     },
     image: {
-        contentType: String,
-        data: Buffer,
+        type: "string",
+        required: true
     },
     icon:{
-        contentType: String,
-        data: Buffer,
+        type: "string",
+        required: true
     },
     rating:{
         type: 'number',
