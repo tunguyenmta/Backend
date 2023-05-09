@@ -88,6 +88,7 @@ const login = asyncHandler( async (req, res, next)=>{
             name: user.name,
             email: user.email,
             img: user.userImage,
+            isAdmin: user.isAdmin,
             token: generateToken(user._id)
         })
     } else{

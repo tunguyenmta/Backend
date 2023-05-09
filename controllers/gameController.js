@@ -43,9 +43,8 @@ const createGame = asyncHandler( async (req, res, next)=>{
     if(req.files){
         const file = req.files
         const imageName = generateFileName()
-
         const fileBuffer = await sharp(file[0].buffer)
-        .resize({ height: 1920, width: 1080, fit: "contain" })
+        .resize({ height: 100, width: 500, fit: "contain" })
         .toBuffer()
         await uploadFile(fileBuffer, imageName, file[0].mimetype)
 
@@ -127,7 +126,13 @@ const ratingGame = asyncHandler( async (req, res, next)=>{
 })
 
 const deleteGame = asyncHandler( async (req, res, next)=>{
-    res.status(200).send({message: `delete user ${req.params.userid}`});
+    const game = await Game.findById(req.params.gameid)
+    if(!game){
+        res.status(404)
+        throw new Error('Game not found!')
+    } 
+    await Game.findByIdAndDelete(req.params.gameid)
+    res.status(200).send({message: `delete game ${game.title}`});
 })
 
 
