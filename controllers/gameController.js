@@ -17,6 +17,15 @@ const getAllGames = asyncHandler( async (req, res, next)=>{
     res.status(200).send(game);
 } )
 
+const getGamesById = asyncHandler( async (req,res,next)=>{
+    const games = await Game.find({'_id': {$in: req.params.ids}})
+    if(!games){
+        res.status(404)
+        throw new Error('Game not found')
+    } 
+    res.status(200).send(games)
+})
+
 const getGameById = asyncHandler( async (req, res, next)=>{
     const game = await Game.findById(req.params.gameid)
     if(!game){
@@ -28,7 +37,7 @@ const getGameById = asyncHandler( async (req, res, next)=>{
 } )
 
 const createGame = asyncHandler( async (req, res, next)=>{
-    const {title, description, creator} = req.body
+    const {title, description, creator, price} = req.body
     const user = await User.findById(creator)
     if(!title || !description || !creator){
         res.status(400)
@@ -44,7 +53,7 @@ const createGame = asyncHandler( async (req, res, next)=>{
         const file = req.files
         const imageName = generateFileName()
         const fileBuffer = await sharp(file[0].buffer)
-        .resize({ height: 100, width: 500, fit: "contain" })
+        .resize({ height: 600, width: 600, fit: "contain" })
         .toBuffer()
         await uploadFile(fileBuffer, imageName, file[0].mimetype)
 
@@ -69,14 +78,14 @@ const createGame = asyncHandler( async (req, res, next)=>{
     //         contentType: req.files[0].mimetype,
     //         data: new Buffer.from(encode_img, 'base64')
     // };
-        game = await Game.create({title: title, description: description, creator: new objectId(user.id), image: imgUrl, icon: iconUrl})
+        game = await Game.create({title: title, description: description, creator: new objectId(user.id), image: imgUrl, icon: iconUrl, price: price})
     } else{
         const defaultImg = fs.readFileSync(path.join('./uploads', 'game.png')).toString('base64');
         const defaultData = {
             contentType: fs.readFileSync(path.join('./uploads', 'game.png')).mimetype,
             data: new Buffer.from(defaultImg,'base64')
     }
-        game = await Game.create({title: title, description: description, creator: new objectId(user.id), image: defaultData, icon: defaultData})
+        game = await Game.create({title: title, description: description, creator: new objectId(user.id), image: defaultData, icon: defaultData, price: price})
     }
     if(game){
         res.status(201).json({
@@ -85,7 +94,8 @@ const createGame = asyncHandler( async (req, res, next)=>{
             descrition: game.description,
             creator: game.creator,
             img: game.image,
-            icon: game.icon
+            icon: game.icon,
+            price: game.price
         })
     } else{
         res.status(400)
@@ -162,6 +172,7 @@ const getImgS3 = asyncHandler( async (req, res, next)=>{
 module.exports = {
     getAllGames,
     getGameById,
+    getGamesById,
     updateGame,
     createGame,
     deleteGame,

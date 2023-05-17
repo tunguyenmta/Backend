@@ -17,8 +17,8 @@ const userSchema = mongoose.Schema({
         default: []
     },
     userImage:{
-        contentType: String,
-        data: Buffer,
+        type: "string",
+        required: true,
     },
     address: {
         type: 'string',

@@ -5,11 +5,32 @@ const path = require('path');
 const objectId = require('mongoose').Types.ObjectId
 const bcrypt = require('bcryptjs');
 const fs = require('fs')
+const sharp = require('sharp')
+const crypto = require('crypto')
+const { uploadFile, deleteFile, getObjectSignedUrl } =require('../middlewares/S3')
+const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+
 
 const getAllUsers = asyncHandler( async (req, res, next)=>{
     const user = await User.find({})
     res.status(200).send(user);
 } )
+
+const getUserByEmail = asyncHandler( async (req, res, next)=>{
+    let user = await User.findOne({ email: req.user.email })
+    if (user){
+        res.status(200).send({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            img: user.userImage,
+            token: generateToken(user._id)
+        })
+    } else{
+        res.status(404)
+        throw new Error("User not found")
+    }
+})
 
 const getUserById = asyncHandler( async (req, res, next)=>{
     const user = await User.findById(req.params.userid)
@@ -37,22 +58,32 @@ const registerUser = asyncHandler( async (req, res, next)=>{
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
     let user
+    // console.log(req.file)
     if(req.file){
-        const img = fs.readFileSync(req.file.path)
-        const encode_img = img.toString('base64')
-        const final_img = {
-        contentType: req.file.mimetype,
-        data: new Buffer.from(encode_img, 'base64')
-    };
-        user = await User.create({name, password: hashedPassword, email, userImage: final_img})
-    } else{
-        const defaultImg = fs.readFileSync(path.join('./uploads', 'anonymous.png')).toString('base64');
-        const defaultData = {
-            contentType: fs.readFileSync(path.join('./uploads', 'anonymous.png')).mimetype,
-            data: new Buffer.from(defaultImg,'base64')
+        const file = req.file
+        const imageName = generateFileName()
+        const fileBuffer = await sharp(file.buffer)
+        .resize({ height: 600, width: 600, fit: "contain" })
+        .toBuffer()
+        await uploadFile(fileBuffer, imageName, file.mimetype)
+        const imgUrl = await getObjectSignedUrl(imageName)
+        user = await User.create({name, password: hashedPassword, email, userImage: imgUrl})
+        // const img = fs.readFileSync(req.file.path)
+        // console.log(req.file)
+        // const encode_img = img.toString('base64')
+        // const final_img = {
+        // contentType: req.file.mimetype,
+        // data: new Buffer.from(encode_img, 'base64')
     }
+     else{
+        const defaultData = "https://w7.pngwing.com/pngs/416/62/png-transparent-anonymous-person-login-google-account-computer-icons-user-activity-miscellaneous-computer-monochrome-thumbnail.png"
+        // const defaultImg = fs.readFileSync(path.join('./uploads', 'anonymous.png')).toString('base64');
+        // const defaultData = {
+        //     contentType: fs.readFileSync(path.join('./uploads', 'anonymous.png')).mimetype,
+        //     data: new Buffer.from(defaultImg,'base64')
         user = await User.create({name, password: hashedPassword, email, userImage: defaultData})
     }
+    
     if(user){
         res.status(201).json({
             _id: user.id,
@@ -101,10 +132,10 @@ const updateUser = asyncHandler( async (req, res, next)=>{
 
     const {name ,address, age} = req.body
     
-    console.log(req.body)
+    // console.log(req.body)
     let updateUser
     if(req.file){
-        console.log(req.file)
+        // console.log(req.file)
         const avatar = fs.readFileSync(req.file.path)
         const encode_img = avatar.toString('base64')
         const final_img = {
@@ -147,6 +178,7 @@ const generateToken = (id)=>{
 module.exports = {
     getAllUsers,
     getUserById,
+    getUserByEmail,
     updateUser,
     deleteUser,
     registerUser,

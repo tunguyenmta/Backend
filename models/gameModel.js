@@ -26,6 +26,11 @@ const gameSchema = mongoose.Schema({
         default: 0
     }
     ,
+    price: {
+        type: 'number',
+        required: true
+    }
+    ,
     creator: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User'},
     buyer: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}], default: []
 })

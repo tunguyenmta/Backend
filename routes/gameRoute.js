@@ -3,6 +3,7 @@ const upload = require('../middlewares/upload')
 const multer = require('multer')
 const {getAllGames,
     getGameById,
+    getGamesById,
     updateGame,
     deleteGame,
     createGame,
@@ -20,6 +21,8 @@ const router = express.Router();
 router.get('/', getAllGames)
 
 router.get('/game', getGame)
+
+router.get('/:ids', getGamesById)
 
 router.get('/:gameid', getGameById)
 
